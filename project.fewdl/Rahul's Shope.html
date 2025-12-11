@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rahul's Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Security-related meta -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">Rahul'sShop</div>
+  <nav class="nav">
+    <button id="nav-products" class="nav-btn active">Products</button>
+    <button id="nav-orders" class="nav-btn">Orders</button>
+  </nav>
+  <div class="user-area">
+    <span id="current-user-label">Guest</span>
+    <button id="btn-login" class="btn small">Login</button>
+    <button id="btn-logout" class="btn small hidden">Logout</button>
+    <button id="btn-cart" class="btn small">Cart (<span id="cart-count">0</span>)</button>
+  </div>
+</header>
+
+<main>
+  <!-- Product listing -->
+  <section id="products-section">
+    <aside class="sidebar">
+      <h3>Categories</h3>
+      <ul id="category-list">
+        <li data-category="all" class="active">All</li>
+        <li data-category="electronics">Electronics</li>
+        <li data-category="fashion">Fashion</li>
+        <li data-category="home">Home</li>
+      </ul>
+
+      <h3>Filters</h3>
+      <label>
+        Min price
+        <input type="number" id="filter-min-price" min="0" step="1">
+      </label>
+      <label>
+        Max price
+        <input type="number" id="filter-max-price" min="0" step="1">
+      </label>
+      <label>
+        Search
+        <input type="text" id="filter-search" placeholder="Product name">
+      </label>
+      <button id="filter-apply" class="btn full">Apply Filters</button>
+      <button id="filter-reset" class="btn full secondary">Reset</button>
+    </aside>
+
+    <section class="product-area">
+      <h2>Products</h2>
+      <div id="product-grid" class="product-grid">
+        <!-- Products rendered by JS -->
+      </div>
+    </section>
+  </section>
+
+  <!-- Cart & checkout -->
+  <section id="cart-section" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2>Your Cart</h2>
+        <button id="cart-close" class="icon-btn" aria-label="Close cart">&times;</button>
+      </header>
+      <div id="cart-items"></div>
+      <div class="cart-summary">
+        <div>Total: <span id="cart-total">0</span> ₹</div>
+        <button id="btn-checkout" class="btn full">Proceed to Checkout</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="checkout-section" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2>Checkout</h2>
+        <button id="checkout-close" class="icon-btn" aria-label="Close checkout">&times;</button>
+      </header>
+      <div class="checkout-layout">
+        <form id="checkout-form" autocomplete="off" novalidate>
+          <h3>Shipping Details</h3>
+          <label>
+            Full name
+            <input type="text" id="ship-name" required minlength="3" maxlength="80">
+          </label>
+          <label>
+            Address
+            <input type="text" id="ship-address" required minlength="5" maxlength="120">
+          </label>
+          <label>
+            City
+            <input type="text" id="ship-city" required minlength="2" maxlength="60">
+          </label>
+          <label>
+            Postal code
+            <input type="text" id="ship-zip" required pattern="[0-9A-Za-z\- ]{4,10}">
+          </label>
+          <label>
+            Phone
+            <input type="tel" id="ship-phone" required pattern="[0-9+\-() ]{7,15}">
+          </label>
+
+          <h3>Payment (Dummy)</h3>
+          <p class="note">
+            This is a sandbox payment form. Do not enter real card data. In production use HTTPS and a PCI‑compliant gateway like Stripe, Razorpay, etc.[web:1][web:10]
+          </p>
+          <label>
+            Card holder name
+            <input type="text" id="card-name" required minlength="3" maxlength="80">
+          </label>
+          <label>
+            Card number (test only)
+            <input type="text" id="card-number" required pattern="[0-9]{16}" inputmode="numeric">
+          </label>
+          <div class="row">
+            <label>
+              Expiry (MM/YY)
+              <input type="text" id="card-expiry" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}">
+            </label>
+            <label>
+              CVV
+              <input type="password" id="card-cvv" required pattern="[0-9]{3}" maxlength="3" inputmode="numeric">
+            </label>
+          </div>
+
+          <input type="hidden" id="csrf-token-input">
+
+          <button type="submit" class="btn full primary">Pay Securely</button>
+        </form>
+
+        <aside class="checkout-summary">
+          <h3>Order Summary</h3>
+          <div id="checkout-items"></div>
+          <div class="summary-line">
+            <span>Subtotal</span><span id="summary-subtotal">0 ₹</span>
+          </div>
+          <div class="summary-line">
+            <span>Shipping</span><span>Free</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total</span><span id="summary-total">0 ₹</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth modal -->
+  <section id="auth-section" class="modal hidden" aria-hidden="true">
+    <div class="modal-content auth-modal">
+      <header class="modal-header">
+        <h2 id="auth-title">Login</h2>
+        <button id="auth-close" class="icon-btn" aria-label="Close auth">&times;</button>
+      </header>
+      <div class="auth-tabs">
+        <button id="tab-login" class="nav-btn small active">Login</button>
+        <button id="tab-register" class="nav-btn small">Register</button>
+      </div>
+      <form id="login-form" autocomplete="off">
+        <label>
+          Email
+          <input type="email" id="login-email" required>
+        </label>
+        <label>
+          Password
+          <input type="password" id="login-password" required minlength="6" maxlength="64">
+        </label>
+        <button type="submit" class="btn full">Login</button>
+      </form>
+
+      <form id="register-form" class="hidden" autocomplete="off">
+        <label>
+          Email
+          <input type="email" id="register-email" required>
+        </label>
+        <label>
+          Password (min 6)
+          <input type="password" id="register-password" required minlength="6" maxlength="64">
+        </label>
+        <button type="submit" class="btn full">Register</button>
+      </form>
+
+      <p class="note">
+        Passwords are stored hashed in localStorage only for demo. Use a real backend with proper hashing and session management in production.[web:3][web:9]
+      </p>
+    </div>
+  </section>
+
+  <!-- Orders -->
+  <section id="orders-section" class="hidden">
+    <h2>Your Orders</h2>
+    <div id="orders-list"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>SecureShop Demo &copy; 2025</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
